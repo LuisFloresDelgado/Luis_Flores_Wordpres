@@ -6,7 +6,7 @@ También tenemos unos grupos de seguridad asociados a cada instancia
 ![image](https://github.com/user-attachments/assets/6e073155-4166-4ff2-8621-79e28552038a)
 
 Gracias a esto nos podremos conectar a la máquina del balanceador y en esta nos podremos conectar al resto, y hacer la siguiente configuración para que nos aparezca la paguina de wordpress:
-
+# En el Balanceador
 # 1. Instalar Apache en el balanceador de carga
 sudo apt install apache2 -y
 
@@ -50,7 +50,7 @@ sudo systemctl restart apache2
 sudo systemctl reload apache2
 
 
-##EN EL NFS
+# EN EL NFS
 
 # 1. Actualizar los repositorios del sistema
 sudo apt update -y
@@ -98,7 +98,7 @@ sudo chown -R nobody:nogroup /var/nfs/compartir/
 sudo systemctl restart nfs-kernel-server
 
 
-EN LOS BACKENDS
+# EN LOS BACKENDS
 # 1. Actualizar los repositorios del sistema
 sudo apt update -y
 
@@ -145,7 +145,7 @@ sudo echo "10.0.2.17:/var/nfs/compartir    /var/nfs/compartir   nfs auto,nofail,
 
 
 
-EN LA BASE DE DATOS
+# EN LA BASE DE DATOS
 
 # 1. Actualizar los repositorios del sistema
 sudo apt update -y
