@@ -7,21 +7,25 @@ También tenemos unos grupos de seguridad asociados a cada instancia
 
 Gracias a esto nos podremos conectar a la máquina del balanceador y en esta nos podremos conectar al resto, y hacer la siguiente configuración para que nos aparezca la paguina de wordpress:
 
-BALANCEADOR DE CARGA
-
+# 1. Instalar Apache en el balanceador de carga
 sudo apt install apache2 -y
-CONFIGURAR EL SERVIDOR WEB APACHE COMO PROXY INVERSO. TENEMOS QUE ACTIVAR ESTOS MÓDULOS COMO MÍNIMO
+
+# 2. Activar los módulos necesarios para configurar Apache como proxy inverso
 sudo a2enmod proxy
 sudo a2enmod proxy_http
 sudo a2enmod proxy_balancer
-ESTE MÉTODO DE BALANCEO DE CARGA CONSISTE EN DISTRIBUIR LAS PETICIONES ENTRE LOS SERVIDORES DE FORMA SECUENCIAL, DE FORMA QUE CADA VEZ QUE LLEGUE UNA NUEVA PETICIÓN SE ENVÍA AL SIGUIENTE SERVIDOR DE LA LISTA DE SERVIDORES CONFIGURADOS EN EL SERVIDOR APACHE
+
+# 3. Configurar el método de balanceo de carga para distribuir las peticiones de forma secuencial
 sudo a2enmod lbmethod_byrequests
-OTROS MÓDULOS NECESARIOS
+
+# 4. Activar otros módulos necesarios
 sudo a2enmod rewrite
 sudo a2enmod headers
-REINICIAMOS APACHE PARA APLICAR CAMBIOS
+
+# 5. Reiniciar Apache para aplicar los cambios
 sudo systemctl restart apache2
-CREAMOS UN NUEVO ARCHIVO DE CONFIGURACIÓN PARA CREAR UN VIRTUALHOST CON LA CONFIGURACIÓN DEL PROXY
+
+# 6. Crear un archivo de configuración para el VirtualHost con la configuración del proxy
 sudo bash -c "cat > /etc/apache2/sites-available/load-balancer.conf <<EOL
 <VirtualHost *:80>
     <Proxy balancer://mycluster>
@@ -32,96 +36,143 @@ sudo bash -c "cat > /etc/apache2/sites-available/load-balancer.conf <<EOL
     ProxyPassReverse / balancer://mycluster/
 </VirtualHost>
 EOL"
-HABILITAMOS EL VIRTUALHOST QUE ACABAMOS DE CREAR
+
+# 7. Habilitar el VirtualHost creado
 sudo a2ensite load-balancer.conf
-DESHABILITAMOS EL VIRTUALHOST QUE TIENE APACHE CONFIGURADO POR DEFECTO
+
+# 8. Deshabilitar el VirtualHost predeterminado de Apache
 sudo a2dissite 000-default.conf
-REINICIAMOS EL SERVICIO PARA APLICAR LOS CAMBIOS
+
+# 9. Reiniciar Apache para aplicar los cambios
 sudo systemctl restart apache2
-REINICIAMOS EL SERVICIO PARA APLICAR LOS CAMBIOS
+
+# 10. Recargar Apache por si hay cambios adicionales pendientes
 sudo systemctl reload apache2
 
 
 EN EL NFS
 
-ACTUALIZAMOS REPOSITORIOS
+# 1. Actualizar los repositorios del sistema
 sudo apt update -y
-INSTALAMOS EL SERVIDOR NFS
+
+# 2. Instalar el servidor NFS
 sudo apt install nfs-kernel-server -y
-INSTALAMOS UNZIP PARA DESCOMPRIMIR ARCHIVOS
+
+# 3. Instalar unzip para descomprimir archivos
 sudo apt install unzip -y
-INSTALAMOS CURL PARA DESCARGAR ARCHIVOS DESDE INTERNET
+
+# 4. Instalar curl para descargar archivos desde Internet
 sudo apt install curl -y
-INSTALAMOS PHP Y SU CONECTOR PARA MYSQL
+
+# 5. Instalar PHP y su conector para MySQL
 sudo apt install php php-mysql -y
-INSTALAMOS EL CLIENTE MYSQL
+
+# 6. Instalar el cliente MySQL
 sudo apt install mysql-client -y
-CREAMOS EL DIRECTORIO PARA COMPARTIR ARCHIVOS
+
+# 7. Crear el directorio para compartir archivos
 sudo mkdir -p /var/nfs/compartir
-DAMOS PERMISOS GENÉRICOS AL DIRECTORIO NFS
-sudo chown nobody:nogroup /var/nfs/compartir 
-CONFIGURAMOS LA CARPETA EN EL ARCHIVO /ETC/EXPORTS PARA COMPARTIRLA CON LA RED
+
+# 8. Dar permisos genéricos al directorio NFS
+sudo chown nobody:nogroup /var/nfs/compartir
+
+# 9. Configurar la carpeta en el archivo /etc/exports para compartirla con la red
 sudo sed -i '$a /var/nfs/compartir    10.0.2.0/24(rw,sync,no_subtree_check)' /etc/exports
-DESCARGAMOS WORDPRESS
+
+# 10. Descargar la última versión de WordPress
 sudo curl -O https://wordpress.org/latest.zip
-DESCOMPRIMIMOS WORDPRESS EN EL DIRECTORIO COMPARTIDO
+
+# 11. Descomprimir WordPress en el directorio compartido
 sudo unzip -o latest.zip -d /var/nfs/compartir/
-DAMOS PERMISOS DE EJECUCIÓN AL DIRECTORIO Y ARCHIVOS COMPARTIDOS
+
+# 12. Dar permisos de ejecución al directorio y archivos compartidos
 sudo chmod 755 -R /var/nfs/compartir/
-ASIGNAMOS COMO PROPIETARIO DE LOS ARCHIVOS AL USUARIO Y GRUPO DE APACHE
+
+# 13. Asignar como propietario de los archivos al usuario y grupo de Apache
 sudo chown -R www-data:www-data /var/nfs/compartir/*
-REASIGNAMOS PERMISOS GENÉRICOS AL DIRECTORIO COMPARTIDO PARA NFS
+
+# 14. Reasignar permisos genéricos al directorio compartido para NFS
 sudo chown -R nobody:nogroup /var/nfs/compartir/
-REINICIAMOS EL SERVIDOR NFS PARA APLICAR LOS CAMBIOS
+
+# 15. Reiniciar el servidor NFS para aplicar los cambios
 sudo systemctl restart nfs-kernel-server
 
+
 EN LOS BACKENDS
-ACTUALIZAMOS REPOSITORIOS
+# 1. Actualizar los repositorios del sistema
 sudo apt update -y
-INSTALAMOS APACHE PARA USARLO COMO BALANCEADOR DE CARGA
+
+# 2. Instalar Apache para usarlo como balanceador de carga en el backend
 sudo apt install apache2 -y
-INSTALAMOS EL CLIENTE NFS PARA MONTAR DIRECTORIOS REMOTOS
+
+# 3. Instalar el cliente NFS para montar directorios remotos
 sudo apt install nfs-common -y
-INSTALAMOS PHP Y LAS DEPENDENCIAS NECESARIAS PARA SERVIR WORDPRESS
+
+# 4. Instalar PHP y las dependencias necesarias para servir WordPress
 sudo apt install php libapache2-mod-php php-mysql php-curl php-gd php-xml php-mbstring php-xmlrpc php-zip php-soap php -y
-CREAMOS UNA COPIA DE LA CONFIGURACIÓN POR DEFECTO DE APACHE PARA USARLA COMO BASE
+
+# 5. Crear una copia de la configuración por defecto de Apache para usarla como base
 sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/web.conf
-CONFIGURAMOS EL DIRECTORIO RAÍZ PARA QUE APACHE SIRVA LOS ARCHIVOS DE WORDPRESS
+
+# 6. Configurar el directorio raíz para que Apache sirva los archivos de WordPress
 sudo sed -i 's|DocumentRoot .*|DocumentRoot /var/nfs/compartir/wordpress|g' /etc/apache2/sites-available/web.conf
-AÑADIMOS PERMISOS PARA ACCEDER AL DIRECTORIO DE WORDPRESS
+
+# 7. Añadir permisos para acceder al directorio de WordPress
 sudo sed -i '/<\/VirtualHost>/i \
 <Directory /var/nfs/compartir/wordpress>\
     Options Indexes FollowSymLinks\
     AllowOverride All\
     Require all granted\
 </Directory>' /etc/apache2/sites-available/web.conf
-MONTAMOS EL DIRECTORIO COMPARTIDO NFS
+
+# 8. Montar el directorio compartido NFS
 sudo mount 10.0.2.17:/var/nfs/compartir /var/nfs/compartir
-DESHABILITAMOS EL SITIO POR DEFECTO DE APACHE
+
+# 9. Deshabilitar el sitio por defecto de Apache
 sudo a2dissite 000-default.conf
-HABILITAMOS LA NUEVA CONFIGURACIÓN DEL SITIO WEB
+
+# 10. Habilitar la nueva configuración del sitio web
 sudo a2ensite web.conf
-REINICIAMOS APACHE PARA APLICAR LOS CAMBIOS
+
+# 11. Reiniciar Apache para aplicar los cambios
 sudo systemctl restart apache2
-RECARGAMOS APACHE POR SI HAY CAMBIOS ADICIONALES PENDIENTES
+
+# 12. Recargar Apache por si hay cambios adicionales pendientes
 sudo systemctl reload apache2
-AÑADIMOS LA CONFIGURACIÓN DE MONTAJE NFS AL ARCHIVO FSTAB PARA QUE SEA PERSISTENTE
+
+# 13. Añadir la configuración de montaje NFS al archivo fstab para que sea persistente
 sudo echo "10.0.2.17:/var/nfs/compartir    /var/nfs/compartir   nfs auto,nofail,noatime,nolock,intr,tcp,actimeo=1800 0 0" | sudo tee -a /etc/fstab
+
 
 
 EN LA BASE DE DATOS
 
-ACTUALIZAMOS LOS REPOSITORIOS DEL SISTEMA
+# 1. Actualizar los repositorios del sistema
 sudo apt update -y
-INSTALAMOS EL SERVIDOR MYSQL
+
+# 2. Instalar el servidor MySQL
 sudo apt install mysql-server -y
-INSTALAMOS PHPMYADMIN PARA GESTIONAR MYSQL DESDE UNA INTERFAZ WEB
+
+# 3. Instalar phpMyAdmin para gestionar MySQL desde una interfaz web
 sudo apt install -y phpmyadmin
-EDITAMOS EL BIND-ADDRESS = 0.0.0.0 DEL /ETC/MYSQL/MYSQL.CONF.D/MYSQLD.CNF
-REINICIAMOS EL SERVICIO MYSQL PARA APLICAR LOS CAMBIOS
+
+# 4. Editar el archivo de configuración de MySQL para permitir conexiones desde cualquier IP
+# Cambiar la configuración del bind-address a 0.0.0.0 en /etc/mysql/mysql.conf.d/mysqld.cnf
+sudo sed -i 's/bind-address\s*=.*$/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf
+
+# 5. Reiniciar el servicio MySQL para aplicar los cambios
 sudo systemctl restart mysql
-CONFIGURAMOS LA BASE DE DATOS Y EL USUARIO PARA WORDPRESS
-sudo mysql 
+
+# 6. Acceder a MySQL para crear la base de datos y el usuario para WordPress
+sudo mysql
+
+# 7. Dentro de MySQL, ejecutar los siguientes comandos para configurar la base de datos y el usuario
+CREATE DATABASE wordpress;
+![image](https://github.com/user-attachments/assets/2de06262-fc74-4e63-b0ab-4207618f0ad1)
+Cmprobamos que tenemos acceso
+![image](https://github.com/user-attachments/assets/672cf818-f5e5-4fbf-a3f9-6e5532dc455b)
+
+
 
 PARA FINALIZAR PONEMOS LA SIGUIENTE IP Y COMPLETAMOS LA INSTALACION, AL ACABARLA, YA NAOS APARECERA LA PÁGUINA.
 http://34.207.204.225/
