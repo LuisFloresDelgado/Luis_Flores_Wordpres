@@ -167,11 +167,9 @@ sudo systemctl restart mysql
 sudo mysql
 
 # 7. Dentro de MySQL, ejecutar los siguientes comandos para configurar la base de datos y el usuario
-CREATE DATABASE wordpress;
 ![image](https://github.com/user-attachments/assets/2de06262-fc74-4e63-b0ab-4207618f0ad1)
-Cmprobamos que tenemos acceso
 ![image](https://github.com/user-attachments/assets/672cf818-f5e5-4fbf-a3f9-6e5532dc455b)
-
+Vemos que tenemos acceso
 
 
 PARA FINALIZAR PONEMOS LA SIGUIENTE IP Y COMPLETAMOS LA INSTALACION, AL ACABARLA, YA NAOS APARECERA LA PÁGUINA.
