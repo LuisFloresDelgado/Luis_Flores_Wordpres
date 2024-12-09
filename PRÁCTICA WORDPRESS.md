@@ -50,7 +50,7 @@ sudo systemctl restart apache2
 sudo systemctl reload apache2
 
 
-EN EL NFS
+##EN EL NFS
 
 # 1. Actualizar los repositorios del sistema
 sudo apt update -y
