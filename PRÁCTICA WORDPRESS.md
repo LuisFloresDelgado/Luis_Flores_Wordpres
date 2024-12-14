@@ -173,6 +173,7 @@ Vemos que tenemos acceso
 
 
 PARA FINALIZAR PONEMOS LA SIGUIENTE IP Y COMPLETAMOS LA INSTALACION, AL ACABARLA, YA NAOS APARECERA LA PÁGUINA.
-http://34.207.204.225/
-![image](https://github.com/user-attachments/assets/fc5d2d65-b256-4777-b907-2f104afa0e58)
+(http://98.85.172.193/)
+![image](https://github.com/user-attachments/assets/1374455b-fd2f-42e8-93a4-65e4e29f3489)
+
 
